@@ -28,6 +28,8 @@ struct tester_operations {
  */
 int tester_run(struct tester_flags *flags, struct tester_operations *ops);
 
+void set_test(char *mnem);
+
 #ifdef __cplusplus
 }
 #endif

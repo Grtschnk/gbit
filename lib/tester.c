@@ -355,8 +355,7 @@ static int test_all_instructions(void)
 
 
 int tester_run(struct tester_flags *app_flags,
-               struct tester_operations *app_tcpu_ops)
-{
+               struct tester_operations *app_tcpu_ops) {
     flags = app_flags;
     tcpu_ops = app_tcpu_ops;
 
@@ -365,3 +364,22 @@ int tester_run(struct tester_flags *app_flags,
 
     return test_all_instructions();
 }
+
+// Function takes string and only enables matching instruction
+void set_test(char *mnem) {
+    size_t num_instructions = sizeof(instructions) / sizeof(instructions[0]);
+    bool found = false;
+    for (size_t i = 0; i < num_instructions; i++) {
+        if (strcmp(instructions[i].mnem, mnem) == 0) {
+            instructions[i].enabled = true;
+            found = true;
+        } else {
+            instructions[i].enabled = false;
+        }
+    }
+    if (!found) {
+        printf("Instruction %s not found\n", mnem);
+        exit(1);
+    }
+}
+
