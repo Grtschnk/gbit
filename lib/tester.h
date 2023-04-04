@@ -7,14 +7,16 @@ extern "C" {
 
 #include "common.h"
 
-struct tester_flags {
+struct tester_flags
+{
     bool keep_going_on_mismatch;
     bool enable_cb_instruction_testing;
     bool print_tested_instruction;
     bool print_verbose_inputs;
 };
 
-struct tester_operations {
+struct tester_operations
+{
     void (*init)(size_t instruction_mem_size, uint8_t *instruction_mem);
     void (*set_state)(struct state *state);
     void (*get_state)(struct state *state);
@@ -28,7 +30,7 @@ struct tester_operations {
  */
 int tester_run(struct tester_flags *flags, struct tester_operations *ops);
 
-void set_test(char *mnem);
+void set_test(const char *mnem);
 
 #ifdef __cplusplus
 }

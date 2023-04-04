@@ -386,7 +386,7 @@ int tester_run(struct tester_flags *app_flags, struct tester_operations *app_tcp
 }
 
 // Function takes string and only enables matching instruction
-void set_test(char *mnem)
+void set_test(const char *mnem)
 {
     size_t num_instructions = sizeof(instructions) / sizeof(instructions[0]);
     bool found = false;
