@@ -253,7 +253,7 @@ static int test_instructions(size_t num_instructions, struct test_inst *insts, c
     {
         bool failure;
 
-        if (flags->print_tested_instruction)
+        if (flags->print_tested_instruction && insts[i].enabled)
         {
             printf("%s   ", insts[i].mnem);
             if (insts[i].is_cb_prefix)
@@ -263,8 +263,11 @@ static int test_instructions(size_t num_instructions, struct test_inst *insts, c
 
         if (!insts[i].enabled)
         {
-            if (flags->print_tested_instruction)
-                printf(" Skipping\n");
+            if (false)
+            {
+                if (flags->print_tested_instruction)
+                    printf(" Skipping\n");
+            }
             continue;
         }
 
@@ -385,9 +388,47 @@ int tester_run(struct tester_flags *app_flags, struct tester_operations *app_tcp
     return test_all_instructions();
 }
 
+static void disable_all_instructions()
+{
+    size_t num_instructions = sizeof(cb_instructions) / sizeof(cb_instructions[0]);
+    for (size_t i = 0; i < num_instructions; i++)
+    {
+        cb_instructions[i].enabled = false;
+    }
+
+    num_instructions = sizeof(instructions) / sizeof(instructions[0]);
+    for (size_t i = 0; i < num_instructions; i++)
+    {
+        instructions[i].enabled = false;
+    }
+}
+
+// Function takes string and only enables matching instruction
+void set_cb_test(const char *mnem)
+{
+    disable_all_instructions();
+    size_t num_instructions = sizeof(cb_instructions) / sizeof(cb_instructions[0]);
+    bool found = false;
+    for (size_t i = 0; i < num_instructions; i++)
+    {
+        if (strcmp(cb_instructions[i].mnem, mnem) == 0)
+        {
+            cb_instructions[i].enabled = true;
+            found = true;
+        }
+    }
+    if (!found)
+    {
+        printf("Instruction %s not found\n", mnem);
+        exit(1);
+    }
+}
+
 // Function takes string and only enables matching instruction
 void set_test(const char *mnem)
 {
+    disable_all_instructions();
+
     size_t num_instructions = sizeof(instructions) / sizeof(instructions[0]);
     bool found = false;
     for (size_t i = 0; i < num_instructions; i++)
@@ -396,10 +437,6 @@ void set_test(const char *mnem)
         {
             instructions[i].enabled = true;
             found = true;
-        }
-        else
-        {
-            instructions[i].enabled = false;
         }
     }
     if (!found)
