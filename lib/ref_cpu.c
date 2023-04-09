@@ -719,14 +719,130 @@ int rcpu_step(void)
     int cycles = 0;
 
     op = mmu_read(s, s->pc);
+    const u8 op_first=op;
     cycles = cycles_per_instruction[op];
-    if (op == 0xcb) {
+    if (op == 0xcb)
+    {
         op = mmu_read(s, s->pc + 1);
         cycles = cycles_per_instruction_cb[op];
     }
 
     if (cpu_do_instruction(s))
         return -1;
+
+    cycles = adjust_cycles(s,op_first, cycles);
+
+    return cycles;
+}
+int adjust_cycles(struct gb_state *pState,u8 op, int cycles)
+{
+    struct gb_state *s = pState;
+//    u8 op = mmu_read(s, s->pc);
+    if (op==0xcb)
+    {
+        return cycles;
+    }
+
+    // JR instructions
+    if (op == 0x20) // JR NZ
+    {
+        if (ZF == 0)
+            cycles += 4;
+    }
+    else if(op == 0x28) // JR Z
+    {
+        if (ZF == 1)
+            cycles += 4;
+    }
+    else if(op == 0x30) // JR NC
+    {
+        if (CF == 0)
+            cycles += 4;
+    }
+    else if(op == 0x38) // JR C
+    {
+        if (CF == 1)
+            cycles += 4;
+    }
+    else if(op == 0x18) // JR
+    {
+//        cycles += 4;
+    }
+
+    // JP instructions
+    else if(op == 0xc2) // JP NZ
+    {
+        if (ZF == 0)
+            cycles += 4;
+    }
+    else if(op == 0xca) // JP Z
+    {
+        if (ZF == 1)
+            cycles += 4;
+    }
+    else if(op == 0xd2) // JP NC
+    {
+        if (CF == 0)
+            cycles += 4;
+    }
+    else if(op == 0xda) // JP C
+    {
+        if (CF == 1)
+            cycles += 4;
+    }
+    else if(op == 0xe9) // JP (HL)
+    {
+//        cycles += 4;
+    }
+
+        // CALL instructions
+        else if(op == 0xc4) // CALL NZ
+        {
+                if (ZF == 0)
+                cycles += 12;
+        }
+        else if(op == 0xcc) // CALL Z
+        {
+                if (ZF == 1)
+                cycles += 12;
+        }
+        else if(op == 0xd4) // CALL NC
+        {
+                if (CF == 0)
+                cycles += 12;
+        }
+        else if(op == 0xdc) // CALL C
+        {
+                if (CF == 1)
+                cycles += 12;
+        }
+
+        // RET instructions
+        else if(op == 0xc0) // RET NZ
+        {
+                if (ZF == 0)
+                cycles += 12;
+        }
+        else if(op == 0xc8) // RET Z
+        {
+                if (ZF == 1)
+                cycles += 12;
+        }
+        else if(op == 0xd0) // RET NC
+        {
+                if (CF == 0)
+                cycles += 12;
+        }
+        else if(op == 0xd8) // RET C
+        {
+                if (CF == 1)
+                cycles += 12;
+        }
+        else if(op == 0xc9) // RET
+        {
+//                cycles += 8;
+        }
+
     return cycles;
 }
 
