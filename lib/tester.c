@@ -135,14 +135,20 @@ static int run_state(struct state *state)
     tcpu_ops->set_state(state);
     rcpu_reset(state);
 
-    tcpu_ops->step();
-    rcpu_step();
+    const u8 t_cycles = tcpu_ops->step();
+    const u8 r_cycles = rcpu_step();
 
     tcpu_ops->get_state(&tcpu_out_state);
     rcpu_get_state(&rcpu_out_state);
 
-    if (!states_eq(&tcpu_out_state, &rcpu_out_state))
+    if (!states_eq(&tcpu_out_state, &rcpu_out_state) || t_cycles != r_cycles)
     {
+        if (t_cycles != r_cycles)
+        {
+            printf("  === CYCLE COUNT MISMATCH ===\n");
+            printf("  Test-CPU cycles: %d", t_cycles);
+            printf("  Real-CPU cycles: %d", r_cycles);
+        }
         printf("\n  === STATE MISMATCH ===\n");
         printf("\n - Instruction -\n");
         disassemble(instruction_mem);
